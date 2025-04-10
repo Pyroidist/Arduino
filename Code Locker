@@ -1,0 +1,64 @@
+#include <LiquidCrystal.h>
+
+// Pin Definitions
+const int buttonPin = 2;  // Pin for the button
+const int ledPin = 13;    // Pin for the LED
+
+// LCD Setup (non-I2C)
+LiquidCrystal lcd(12, 11, 5, 4, 3, 6);  // Pin RS, EN, D4, D5, D6, D7
+
+// Variables to manage button state
+int buttonState = 0;           // Current state of the button
+int lastButtonState = 0;       // Last state of the button
+unsigned long lastDebounceTime = 0;  // The last time the button state changed
+unsigned long debounceDelay = 50;    // Debounce time (in milliseconds)
+
+void setup() {
+  // Initialize the button pin as input with internal pull-up
+  pinMode(buttonPin, INPUT_PULLUP);
+  
+  // Initialize the LED pin as output
+  pinMode(ledPin, OUTPUT);
+  
+  // Initialize the LCD
+  lcd.begin(16, 2);  // Set the LCD's number of columns and rows
+  lcd.print("Press the Button");
+  
+  // Initial LED state (off)
+  digitalWrite(ledPin, LOW);
+}
+
+void loop() {
+  // Read the state of the button
+  int reading = digitalRead(buttonPin);
+
+  // If the button state has changed, due to noise or pressing
+  if (reading != lastButtonState) {
+    lastDebounceTime = millis();  // reset debounce timer
+  }
+
+  // If the button has been stable for the debounceDelay time, consider it pressed
+  if ((millis() - lastDebounceTime) > debounceDelay) {
+    // If the button is pressed
+    if (reading == LOW) {
+      // Turn on the LED
+      digitalWrite(ledPin, HIGH);
+      
+      // Print message on the LCD
+      lcd.clear();
+      lcd.print("Button Pressed");
+    } 
+    // If the button is released
+    else {
+      // Turn off the LED
+      digitalWrite(ledPin, LOW);
+      
+      // Clear the LCD and show a message when released
+      lcd.clear();
+      lcd.print("Press the Button");
+    }
+  }
+
+  // Save the current reading as the last button state
+  lastButtonState = reading;
+}
